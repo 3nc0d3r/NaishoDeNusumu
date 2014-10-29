@@ -14,6 +14,7 @@ class naishoencoding:
 		
 		import base64
 		try:
+			#self.message = self.message.encode('base64')
 			self.message = base64.b64encode(self.message)
 		except:
 			print "[-] Base64 encoding error"
@@ -50,6 +51,7 @@ class naishoencoding:
 		try:
 			self.message = self.message.encode('rot_13')
 		except:
+			#print "UTF-8 encoding error"
 			raw_input("[-] ROT-13 cannot encode, try to encode with something else before using ROT-13")
         #--------------------------------------------|
         #               Base32                       |
@@ -72,6 +74,32 @@ class naishoencoding:
                         self.message = base64.b16encode(self.message)
                 except:
                         print ("[-] Base16 encoding error. Data was not encoded")
+	#--------------------------------------------|
+	#               BZ2 compress                 |
+	#--------------------------------------------|------------------------------------------------------------------------------------------------
+	def naishobz2com(self):
+		try:
+			import bz2
+			self.message = bz2.compress(self.message)
+		except:
+			raw_input ("[-] Bz2 commpressing error. Data was not encoded")
+        #--------------------------------------------|
+        #               zlib compress                 |
+        #--------------------------------------------|------------------------------------------------------------------------------------------------
+        def naishozlibcom(self):
+                try:
+                        import zlib
+                        self.message = zlib.compress(self.message, 6)
+                except:
+                        raw_input ("[-] zlib commpressing error. Data was not encoded")
+        #--------------------------------------------|
+        #               utf8 compress                |
+        #--------------------------------------------|------------------------------------------------------------------------------------------------
+        def naishoutf8(self):
+                try:
+                        self.message = self.message.encode('utf32')
+                except:
+                        raw_input ("[-] utf32 commpressing error. Data was not encoded")
 	#--------------------------------------------|
         #               Show Data                    |
         #--------------------------------------------|------------------------------------------------------------------------------------------------

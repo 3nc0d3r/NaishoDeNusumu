@@ -33,14 +33,22 @@ class naishoencryption:
 			from Crypto.Cipher import AES
 			import base64
 			
+			# the character used for padding--with a block cipher such as AES, the value
+			# you encrypt must be a multiple of BLOCK_SIZE in length. This character is
+			# used to ensure that your value is always a multiple of BLOCK_SIZE
 			BLOCK_SIZE = 32
 			PADDING = '{'
 			
+			# one-liner to sufficiently pad the text to be encrypted
    			
 			pad = lambda s: s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * PADDING
 		
+			# one-liners to encrypt/encode and decrypt/decode a string
+			# encrypt with AES, encode with base64
 			EncodeAES = lambda c, s: base64.b64encode(c.encrypt(pad(s)))
+			DecodeAES = lambda c, e: c.decrypt(base64.b64decode(e)).rstrip(PADDING)
 			
+			# generate a random secret key
 			banner1()
 			rand = raw_input("[1] Create Random key\n[2] Create custom key\n\nNaisho:Encryption:AES> ")
 			if rand == str(1):
@@ -56,8 +64,10 @@ class naishoencryption:
 				while ((len(secret) != 16) and (len(secret) != 24) and (len(secret) != 32)):
 					secret =  getpass.getpass("\033[31m### Passphrase is not 16, 24, or 32 characters long ### \n\n*Secret Passphrase (needs to be 16, 24, or 32 characters long): \033[0m\n\nNaisho:Encryption:AES> ")
 				
+			# create a cipher object using the random secret
 			cipher = AES.new(secret)
 			
+			# encode a string
 			
 			encrypted = EncodeAES(cipher, self.message)
 			self.message = encrypted

